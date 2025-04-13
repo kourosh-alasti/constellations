@@ -38,6 +38,22 @@ export default function LoginPage() {
         ) : (
           <LoginForm onError={handleError} />
         )}
+
+        <div className="flex items-center justify-center gap-4 my-6">
+          <div className="h-px flex-1 bg-muted" />
+          <span className="text-muted-foreground text-sm">
+            {showSignup ? "Already have an account?" : "Don't have an account?"}
+          </span>
+          <div className="h-px flex-1 bg-muted" />
+        </div>
+
+        <Button
+          type="button"
+          className="w-full"
+          onClick={() => setShowSignup(!showSignup)}
+        >
+          {showSignup ? "Log In" : "Sign Up"}
+        </Button>
       </div>
     </div>
   );
