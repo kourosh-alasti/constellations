@@ -5,7 +5,8 @@ import Head from "next/head";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
-import CameraDialog from "@/components/ui/camera-dialog"; // <-- import the new component
+import CameraDialog from "@/components/ui/camera-dialog";
+import EditProfileButton from "@/components/ui/edit-profile";
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -147,7 +148,10 @@ const NodesPage = () => {
               Explore your connections in the cosmic web
             </p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <EditProfileButton />
+            <ThemeToggle />
+          </div>
         </div>
 
         <div

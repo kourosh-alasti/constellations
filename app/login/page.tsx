@@ -3,10 +3,16 @@
 import { LoginForm } from "@/components/ui/login-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import FaceID from "@/components/ui/face-id";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const handleClose = (open: boolean) => {
+    setOpen(open);
+  };
 
   const handleSuccess = () => {
     // Navigate to the dashboard or home page after successful login
@@ -27,6 +33,17 @@ export default function LoginPage() {
         )}
 
         <LoginForm onSuccess={handleSuccess} onError={handleError} />
+
+        <div className="flex items-center justify-center gap-4 my-6">
+          <div className="h-px flex-1 bg-muted" />
+          <span className="text-muted-foreground text-sm">or log in with face id</span>
+          <div className="h-px flex-1 bg-muted" />
+        </div>
+
+        <Button type="submit" className="w-full" onClick={() => setOpen(true)}>
+          Use your Face
+        </Button>
+        <FaceID open={open} onOpenChange={handleClose} />
       </div>
     </div>
   );

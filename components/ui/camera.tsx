@@ -90,8 +90,8 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
 
       {/* detection banner */}
       {faceDetected && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 backdrop-blur-md px-6 py-2 rounded-md font-bold text-lg animate-pulse shadow-lg">
-          face detected
+        <div className="absolute bottom-4 left-4 text-4xl animate-bounce">
+        🌟
         </div>
       )}
     </div>
