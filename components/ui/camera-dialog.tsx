@@ -22,33 +22,67 @@ interface CameraDialogProps {
 
 export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) {
   const [photoCaptured, setPhotoCaptured] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [relation, setRelation] = useState("");
 
-  const handlePhotoCaptured = () => {
+  // after photo captured
+  const handlePhotoCaptured = (image: string) => {
+    setCapturedImage(image);
     setPhotoCaptured(true);
   };
 
-  // handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("First Name:", firstName);
-    console.log("Last Name:", lastName);
-    console.log("Relation:", relation);
-
-    // reset after submit
-    onOpenChange(false);
-    setPhotoCaptured(false);
-    setFirstName("");
-    setLastName("");
-    setRelation("");
-  };
-
-  // handle photo retake
+  // retake photo
   const handleRetake = () => {
     setPhotoCaptured(false);
+    setCapturedImage(null);
+  };
+
+  // handle form submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!capturedImage) {
+      console.error("No captured image!");
+      return;
+    }
+
+    const payload = {
+      first_name: firstName,
+      last_name: lastName,
+      image: capturedImage,
+      color: "#ffffff",
+    };
+
+    console.log("Submitting payload:", payload);
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/node", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to upload data");
+
+      const data = await res.json();
+      console.log("Upload successful!", data);
+
+      // reset everything
+      onOpenChange(false);
+      setPhotoCaptured(false);
+      setCapturedImage(null);
+      setFirstName("");
+      setLastName("");
+      setRelation("");
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
   };
 
   return (
@@ -56,7 +90,7 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
       <DialogContent className="sm:max-w-[425px] bg-black border border-gray-400 text-white rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-white">
-            {!photoCaptured ? "Take a Photo" : "Enter Details"}
+            {!photoCaptured ? "Take a Photo" : "Enter Person Details"}
           </DialogTitle>
           <DialogDescription className="text-gray-400">
             {!photoCaptured
@@ -65,19 +99,16 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
           </DialogDescription>
         </DialogHeader>
 
-        {/* body content */}
+        {/* content */}
         {!photoCaptured ? (
           <div className="flex flex-col items-center">
             <WebcamCapture onPhotoCaptured={handlePhotoCaptured} />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-
-            {/* first name field */}
+            {/* first name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="firstName" className="text-right text-white">
-                First Name
-              </Label>
+              <Label htmlFor="firstName" className="text-right text-white">First Name</Label>
               <Input
                 id="firstName"
                 className="col-span-3 bg-neutral-900 text-white"
@@ -87,11 +118,9 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
               />
             </div>
 
-            {/* last name field */}
+            {/* last name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lastName" className="text-right text-white">
-                Last Name
-              </Label>
+              <Label htmlFor="lastName" className="text-right text-white">Last Name</Label>
               <Input
                 id="lastName"
                 className="col-span-3 bg-neutral-900 text-white"
@@ -101,11 +130,9 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
               />
             </div>
 
-            {/* relation field */}
+            {/* relation */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="relation" className="text-right text-white">
-                Relation
-              </Label>
+              <Label htmlFor="relation" className="text-right text-white">Relation</Label>
               <div className="col-span-3">
                 <Select
                   value={relation}
@@ -135,7 +162,6 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
                 >
                   Retake Photo
                 </Button>
-
                 <Button
                   type="submit"
                   className="bg-white text-black hover:bg-gray-200"

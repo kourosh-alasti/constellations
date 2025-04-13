@@ -5,7 +5,7 @@ import Webcam from "react-webcam";
 import { FaceDetector, FilesetResolver } from "@mediapipe/tasks-vision";
 
 interface WebcamCaptureProps {
-  onPhotoCaptured: () => void; // function to call when a face is detected
+  onPhotoCaptured: (image: string) => void;
 }
 
 // video constraints
@@ -16,13 +16,10 @@ const videoConstraints = {
 };
 
 export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
-  // refs
   const webcamRef = useRef<Webcam>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
 
-  // state
   const [faceDetected, setFaceDetected] = useState(false);
-  const [hasUploaded, setHasUploaded] = useState(false);
 
   // load face detector model
   const loadFaceDetector = useCallback(async () => {
@@ -41,7 +38,7 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
     faceDetectorRef.current = detector;
   }, []);
 
-  // capture image and run face detection
+  // capture and detect faces
   const captureAndSend = useCallback(async () => {
     if (webcamRef.current && faceDetectorRef.current && !faceDetected) {
       const imageSrc = webcamRef.current.getScreenshot();
@@ -56,25 +53,8 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
             console.log(`✅ Face detected!`);
             setFaceDetected(true);
 
-            onPhotoCaptured();
-
-            // continue uploading image to server
-            try {
-              const res = await fetch("/api/upload-image", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ image: imageSrc }),
-              });
-
-              if (!res.ok) throw new Error("Failed to upload image");
-
-              await res.json();
-              setHasUploaded(true);
-            } catch (error) {
-              console.error("Upload error:", error);
-            }
+            // pass the captured image to parent
+            onPhotoCaptured(imageSrc);
           } else {
             console.log("❌ No face detected.");
           }
@@ -83,12 +63,10 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
     }
   }, [faceDetected, onPhotoCaptured]);
 
-  // load face detector once on mount
   useEffect(() => {
     loadFaceDetector();
   }, [loadFaceDetector]);
 
-  // scan for faces every 2 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       captureAndSend();
@@ -99,7 +77,7 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
 
   return (
     <div className="relative w-full max-w-4xl overflow-hidden rounded-md border-2 border-gray-700 shadow-md bg-gray-800">
-      {/* webcam */}
+      {/* webcam feed */}
       <Webcam
         className="rounded-md w-full"
         audio={false}
@@ -110,16 +88,10 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
         videoConstraints={videoConstraints}
       />
 
-      {/* banners */}
+      {/* detection banner */}
       {faceDetected && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-600/90 backdrop-blur-md px-6 py-2 rounded-md text-white font-bold text-lg animate-pulse shadow-lg">
           face detected
-        </div>
-      )}
-
-      {hasUploaded && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-600/90 backdrop-blur-md px-6 py-2 rounded-md text-white font-bold text-lg shadow-lg">
-          uploaded
         </div>
       )}
     </div>
