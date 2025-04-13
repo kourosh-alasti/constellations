@@ -48,7 +48,7 @@ def match_face(face: FaceRequest, session: Conn):
     return closest.all()
 
 
-@router.get('/node/{user_id}', response_model=NodePublic)
+@router.get('/node/{user_id}', response_model=BaseNode)
 def get_user(user_id: int, session: Conn):
 
     user = session.get(Node, user_id)
@@ -57,9 +57,8 @@ def get_user(user_id: int, session: Conn):
         raise HTTPException(status_code=404, detail='User not found')
    
     node = user.dict()
-    node['name'] = user.first_name 
     
-    new_node = NodePublic(**node)
+    new_node = BaseNode(**node)
     return new_node
 
 

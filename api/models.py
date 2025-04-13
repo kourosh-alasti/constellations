@@ -57,13 +57,6 @@ class AuthRequest(BaseModel):
     last_name: str
 
 # API request/response models 
-class GetNode(BaseModel):
-    """
-    Response for get_users endpoints
-
-    a list of users in a related constellation
-    """
-    pass
 
 class NodePublic(BaseModel):
     id: int
