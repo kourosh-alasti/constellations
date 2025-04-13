@@ -55,4 +55,4 @@ def new_user(new_node: NodeCreate, session: Conn):
     session.commit()
     session.refresh(node_db)
     
-    return node_db
+    return node_db.id
