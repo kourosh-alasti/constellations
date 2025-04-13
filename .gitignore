@@ -40,3 +40,6 @@ __pycache__/
 venv
 env
 uploads/
+.venv
+web
+
