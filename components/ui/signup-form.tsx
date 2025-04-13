@@ -45,7 +45,7 @@ export function SignupForm({ onError }: SignupFormProps) {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-  
+
     try {
       const response = await fetch("/api/py/auth/new", {
         method: "POST",
@@ -59,17 +59,17 @@ export function SignupForm({ onError }: SignupFormProps) {
           color: "#ffffff",
         }),
       });
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(result.message || "Signup failed");
       }
-  
-      console.log("Signup successful!", result);
-  
-      localStorage.setItem("user_id", result.id);
-  
+
+      localStorage.setItem("user_id", String(result));
+
+      console.log("User ID saved to storage:", result);
+
       router.push("/nodes");
     } catch (error) {
       console.error("Signup error:", error);
@@ -81,7 +81,7 @@ export function SignupForm({ onError }: SignupFormProps) {
     } finally {
       setIsLoading(false);
     }
-  }  
+  }
 
   const handlePhotoCaptured = (image: string) => {
     setCapturedImage(image);
