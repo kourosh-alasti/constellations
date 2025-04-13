@@ -12,7 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import WebcamCapture from "@/components/ui/camera";
 
 interface CameraDialogProps {
@@ -20,7 +26,10 @@ interface CameraDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) {
+export default function CameraDialog({
+  open,
+  onOpenChange,
+}: CameraDialogProps) {
   const [introDone, setIntroDone] = useState(false);
   const [photoCaptured, setPhotoCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -66,16 +75,17 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
       last_name: lastName,
       image: capturedImage,
       // color: "#ffffff",
+      relation: relation,
     };
 
     console.log("Submitting payload:", payload);
 
     try {
-      const res = await fetch("/api/py/node", {
+      const res = await fetch("/api/py/node/1", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "accept": "application/json",
+          accept: "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -100,15 +110,15 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
             {!introDone
               ? "Add a Star to Your Galaxy"
               : !photoCaptured
-                ? "Take a Photo"
-                : "Enter Details"}
+              ? "Take a Photo"
+              : "Enter Details"}
           </DialogTitle>
           <DialogDescription>
             {!introDone
               ? "Ready to shine? Make sure your star is centered and alone!"
               : !photoCaptured
-                ? "Position yourself carefully in the frame. We'll capture automatically."
-                : "Fill out the person's information after capturing their photo."}
+              ? "Position yourself carefully in the frame. We'll capture automatically."
+              : "Fill out the person's information after capturing their photo."}
           </DialogDescription>
         </DialogHeader>
 
@@ -129,7 +139,9 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
             {/* first name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="firstName" className="text-right">First Name</Label>
+              <Label htmlFor="firstName" className="text-right">
+                First Name
+              </Label>
               <Input
                 id="firstName"
                 className="col-span-3"
@@ -141,7 +153,9 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
             {/* last name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lastName" className="text-right">Last Name</Label>
+              <Label htmlFor="lastName" className="text-right">
+                Last Name
+              </Label>
               <Input
                 id="lastName"
                 className="col-span-3"
@@ -153,14 +167,19 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
             {/* relation */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="relation" className="text-right">Relation</Label>
+              <Label htmlFor="relation" className="text-right">
+                Relation
+              </Label>
               <div className="col-span-3">
                 <Select
                   value={relation}
                   onValueChange={(value) => setRelation(value)}
                   required
                 >
-                  <SelectTrigger id="relation" className="rounded-md p-2 w-full pl-3">
+                  <SelectTrigger
+                    id="relation"
+                    className="rounded-md p-2 w-full pl-3"
+                  >
                     <SelectValue placeholder="Select relationship" />
                   </SelectTrigger>
                   <SelectContent className="rounded-md">
