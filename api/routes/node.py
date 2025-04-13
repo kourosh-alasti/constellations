@@ -21,24 +21,41 @@ class FaceRequest(BaseModel):
 
 @router.post('/match-face/{user_id}')
 def match_face(face: FaceRequest, session: Conn):
+    """
+    Match a face against the database and return the closest matches
     
-    if face.image.startswith('data:image'):
-        image_data = face.image.split(',', 1)[1]
-    else:
-        image_data = face.image
+    Parameters:
+    face: Face image to match (base64 encoded)
+    """
+    try:
+        # Process image
+        if face.image.startswith('data:image'):
+            image_data = face.image.split(',', 1)[1]
+        else:
+            image_data = face.image
 
+<<<<<<< Updated upstream
     filename = str(uuid4())
+=======
+        # Generate a safer filename
+        import uuid
+        filename = str(uuid.uuid4())
+>>>>>>> Stashed changes
 
-    image_decoded = base64.b64decode(image_data)
-    saved_file = f'uploads/temp/{filename}.jpg'
+        # Save and process image
+        image_decoded = base64.b64decode(image_data)
+        saved_file = f'uploads/temp/{filename}.jpg'
 
-    image_file = BytesIO(image_decoded)
-    image_file = Image.open(image_file)
-    image_file.save(saved_file)
-    image_file.close()
+        # Ensure directory exists
+        import os
+        os.makedirs('uploads/temp', exist_ok=True)
 
-    embed = gen_embed(saved_file, get_facenet_model())[0]
+        image_file = BytesIO(image_decoded)
+        image_file = Image.open(image_file)
+        image_file.save(saved_file)
+        image_file.close()
 
+<<<<<<< Updated upstream
     closest = session.exec(select(Node).order_by(Node.embed.l2_distance(embed)).limit(10)) 
 
     if not closest:
@@ -52,6 +69,51 @@ def match_face(face: FaceRequest, session: Conn):
         'image': candidate.image,
         'distance': candidate.embed.l2_distance(embed)
     } for candidate in candidates]
+=======
+        # Generate embedding
+        embed = gen_embed(saved_file, get_facenet_model())[0]
+
+        # Use direct SQL with pgvector's distance function
+        from sqlalchemy import text, func
+        from sqlalchemy.sql import select as sa_select
+        
+        # Method 1: Using SQLModel with direct distance calculation
+        stmt = select(
+            Node.id, 
+            Node.first_name, 
+            Node.last_name, 
+            Node.image,
+            Node.color,
+            Node.embed.l2_distance(embed).label("distance")
+        ).order_by(
+            Node.embed.l2_distance(embed)
+        ).limit(5)
+        
+        result = session.exec(stmt)
+        matches = result.all()
+        
+        if not matches:
+            raise HTTPException(status_code=404, detail='No matches found')
+            
+        # Convert to a list of dictionaries with distance scores
+        response = []
+        for match in matches:
+            response.append({
+                "id": match.id,
+                "first_name": match.first_name,
+                "last_name": match.last_name,
+                "similarity_score": 1.0 / (1.0 + float(match.distance)),  # Convert distance to similarity (0-1)
+                "distance": float(match.distance)  # Original L2 distance
+            })
+            
+        return response
+        
+    except Exception as e:
+        print(f"Error in match_face: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Error matching face: {str(e)}")
+>>>>>>> Stashed changes
 
 
 @router.get('/node/{user_id}', response_model=BaseNode)
