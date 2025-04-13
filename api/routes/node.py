@@ -5,6 +5,7 @@ from PIL import Image
 import base64
 from pydantic import BaseModel, Field
 from sqlmodel import select
+from uuid import uuid4
 
 # from ..face import gen_embed
 from ..face import get_facenet_model, gen_embed
@@ -26,7 +27,7 @@ def match_face(face: FaceRequest, session: Conn):
     else:
         image_data = face.image
 
-    filename = face.image[:15]
+    filename = str(uuid4())
 
     image_decoded = base64.b64decode(image_data)
     saved_file = f'uploads/temp/{filename}.jpg'

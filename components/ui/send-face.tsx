@@ -54,14 +54,13 @@ export default function SendFace({ open, onOpenChange }: SendFaceProps) {
     }
 
     const payload = {
-      user_id: userId,
-      image: capturedImage,
+      image: capturedImage
     };
 
     console.log("Submitting payload:", payload);
 
     try {
-      const res = await fetch("/api/py/node/", {
+      const res = await fetch(`/api/py/match-face/${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
