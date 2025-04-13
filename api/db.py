@@ -1,12 +1,16 @@
 from sqlmodel import SQLModel, Session, create_engine, text
 from fastapi import Depends
 from typing import Annotated
-from models import *
 from dotenv import load_dotenv
 import os
 
+from .models import *
+
 load_dotenv()
 CONNECTION_URL = os.getenv('POSTGRES_URL')
+if not CONNECTION_URL:
+    raise ValueError("The 'POSTGRES_URL' environment variable is not set. Please set it to a valid database URL.")
+
 conn_url = f"{CONNECTION_URL}"  
 
 # CONNECTION_URL = "constellations.db"
