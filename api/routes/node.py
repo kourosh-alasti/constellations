@@ -4,10 +4,12 @@ from io import BytesIO
 from PIL import Image
 import base64
 
+# from ..face import gen_embed
+from ..face import get_facenet_model, gen_embed
 from ..models import BaseNode, NodeCreate, Node
 from ..db import Conn 
 
-router = APIRouter()
+router = APIRouter(prefix="/api/py")
 
 @router.get('/face')
 def get_face(photo: Annotated[bytes, File()]):
@@ -33,16 +35,28 @@ def new_user(new_node: NodeCreate, session: Conn):
     last_name: last name of the new user
     image: base64 encoded jpg image
     """
+   
+    if new_node.image.startswith('data:image'):
+        image_data = new_node.image.split(',', 1)[1]
+    else:
+        image_data = new_node.image
 
-    image = new_node.image
-    image_decoded = base64.b64decode(image)
+    new_node.image = image_data
+    image_decoded = base64.b64decode(image_data)
+
+    saved_file = f'uploads/{new_node.first_name}_{new_node.last_name}.jpg'
 
     image_file = BytesIO(image_decoded)
     image_file = Image.open(image_file)
-    image_file.save(f'{new_node.first_name}_{new_node.last_name}.jpg')
+    image_file.save(saved_file)
     image_file.close()
 
-    node_db = Node.model_validate(new_node)
+    embed = gen_embed(saved_file, get_facenet_model())[0]
+    print(embed)
+
+    node_data = new_node.dict()
+    node_data['embed'] = embed
+    node_db = Node(**node_data)
 
     session.add(node_db)
     session.commit()

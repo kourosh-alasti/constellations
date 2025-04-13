@@ -14,11 +14,11 @@ class BaseNode(SQLModel):
         arbitrary_types_allowed = True
 
 class NodeCreate(BaseNode):
-    pass
+    ...
 
 class Node(BaseNode, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    # embed: Any = Field(default=None, sa_type=Vector(1))
+    embed: Any = Field(default=None, sa_type=Vector(512))
 
 # Edge
 # TODO: Fill in relationship deps
