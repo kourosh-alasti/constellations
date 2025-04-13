@@ -8,7 +8,9 @@ from ..db import Conn
 from ..models import Node, AuthRequest, NodeCreate
 from ..face import gen_embed, get_facenet_model
 
-router = APIRouter(prefix='/api/py')
+router = APIRouter(
+    prefix='/api/py'
+)
 
 
 @router.post('/auth')

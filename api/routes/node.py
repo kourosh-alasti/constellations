@@ -8,18 +8,10 @@ from pydantic import BaseModel, Field
 
 # from ..face import gen_embed
 from ..face import get_facenet_model, gen_embed
-from ..models import BaseNode, NodeCreate, Node, Edge
+from ..models import BaseNode, NodeCreate, Node, Edge, NodePublic
 from ..db import Conn 
 
-class NodePublic(BaseModel):
-    id: int
-    name: str
-    x: int = Field(default_factory=lambda: random.randint(0, 1000))
-    y: int  = Field(default_factory=lambda: random.randint(0, 800))
-    vx: int = Field(default=0)
-    vy: int = Field(default=0)
-    color: str = Field(default='ffffff')
-    size: int = Field(default=1)
+
 
 
 router = APIRouter(prefix="/api/py")
