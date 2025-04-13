@@ -3,6 +3,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from pgvector.sqlalchemy import Vector
 from typing import Any, List, Optional
 import random
+from sqlalchemy import Column
 
 # Node
 class BaseNode(SQLModel):
@@ -18,8 +19,8 @@ class NodeCreate(BaseNode):
     ...
 
 class Node(BaseNode, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    embed: Any = Field(default=None, sa_type=Vector(512))
+    id: Optional[int] = Field(default=None, primary_key=True)
+    embed: Any = Field(sa_column=Column(Vector(512)), default=None)
 
     # Relationships
     source_edges: List["Edge"] = Relationship(
