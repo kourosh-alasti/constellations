@@ -76,7 +76,7 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
   }, [captureAndSend]);
 
   return (
-    <div className="relative w-full max-w-4xl overflow-hidden rounded-md border-2 border-gray-700 shadow-md bg-gray-800">
+    <div className="relative w-full max-w-4xl overflow-hidden rounded-md border-2 shadow-md">
       {/* webcam feed */}
       <Webcam
         className="rounded-md w-full"
@@ -90,7 +90,7 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
 
       {/* detection banner */}
       {faceDetected && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-600/90 backdrop-blur-md px-6 py-2 rounded-md text-white font-bold text-lg animate-pulse shadow-lg">
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 backdrop-blur-md px-6 py-2 rounded-md font-bold text-lg animate-pulse shadow-lg">
           face detected
         </div>
       )}
