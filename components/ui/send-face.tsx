@@ -23,15 +23,17 @@ export default function SendFace({ open, onOpenChange }: SendFaceProps) {
   const [introDone, setIntroDone] = useState(false);
   const [photoCaptured, setPhotoCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [userId, setUserId] = useState("");
 
-  // Reset fields when dialog closes
+  const [matches, setMatches] = useState<any[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
+
+  // Reset everything when closed
   useEffect(() => {
     if (!open) {
       setIntroDone(false);
       setPhotoCaptured(false);
       setCapturedImage(null);
-      setUserId("");
+      setMatches([]);
     }
   }, [open]);
 
@@ -45,19 +47,19 @@ export default function SendFace({ open, onOpenChange }: SendFaceProps) {
     setCapturedImage(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!capturedImage || !userId) {
-      console.error("Photo or User ID missing!");
+  const handleSubmit = async () => {
+    if (!capturedImage) {
+      console.error("No photo captured!");
       return;
     }
 
-    const payload = {
-      image: capturedImage
-    };
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      console.error("User ID missing from local storage!");
+      return;
+    }
 
-    console.log("Submitting payload:", payload);
+    const payload = { image: capturedImage };
 
     try {
       const res = await fetch(`/api/py/match-face/${userId}`, {
@@ -69,14 +71,49 @@ export default function SendFace({ open, onOpenChange }: SendFaceProps) {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to upload data");
+      if (!res.ok) throw new Error("Failed to upload photo for matching");
 
       const data = await res.json();
-      console.log("Upload successful!", data);
+      console.log("Matching complete!", data);
 
-      onOpenChange(false);
+      fetchMatchedUsers(data);
     } catch (error) {
       console.error("Upload error:", error);
+    }
+  };
+
+  const fetchMatchedUsers = async (matches: any[]) => {
+    setLoadingMatches(true);
+    try {
+      const detailedMatches = await Promise.all(
+        matches.map(async (match: any) => {
+          try {
+            const res = await fetch(`/api/py/node/${match.id}`, {
+              method: "GET",
+              headers: { Accept: "application/json" },
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch user");
+
+            const user = await res.json();
+            return {
+              id: user.id,
+              firstName: user.first_name,
+              lastName: user.last_name,
+              image: user.image ? `data:image/jpeg;base64,${user.image}` : null,
+            };
+          } catch (err) {
+            console.error("Failed to fetch match", match.id, err);
+            return null;
+          }
+        })
+      );
+
+      setMatches(detailedMatches.filter(Boolean));
+    } catch (err) {
+      console.error("Failed fetching matched users", err);
+    } finally {
+      setLoadingMatches(false);
     }
   };
 
@@ -86,68 +123,81 @@ export default function SendFace({ open, onOpenChange }: SendFaceProps) {
         <DialogHeader>
           <DialogTitle>
             {!introDone
-              ? "Add a Star to Your Galaxy"
+              ? "Scan a New Star"
               : !photoCaptured
-              ? "Take a Photo"
-              : "Enter Your User ID"}
+              ? "Capture the Star"
+              : matches.length === 0
+              ? "Searching the Constellation..."
+              : "Star(s) Found!"}
           </DialogTitle>
           <DialogDescription>
             {!introDone
-              ? "Ready to shine? Make sure your star is centered and alone!"
+              ? "Welcome, Stargazer. Let's add a new star to your constellation."
               : !photoCaptured
-              ? "Position yourself carefully in the frame. We'll capture automatically."
-              : "Enter your user ID to upload your photo."}
+              ? "Position the star (person) carefully. We'll capture it automatically."
+              : matches.length === 0
+              ? "Analyzing the cosmic web for matches..."
+              : "We found these matching stars in your galaxy."}
           </DialogDescription>
         </DialogHeader>
 
+        {/* Steps */}
         {!introDone ? (
           <div className="flex flex-col items-center gap-4 py-6">
             <Button
               onClick={() => setIntroDone(true)}
               className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
             >
-              Start Camera
+              Begin Scan
             </Button>
           </div>
         ) : !photoCaptured ? (
           <div className="flex flex-col items-center">
             <WebcamCapture onPhotoCaptured={handlePhotoCaptured} />
           </div>
+        ) : matches.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-6">
+            <Button
+              onClick={handleSubmit}
+              disabled={loadingMatches}
+              className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
+            >
+              {loadingMatches ? "Scanning Stars..." : "Submit Scan"}
+            </Button>
+            <Button
+              onClick={handleRetake}
+              variant="secondary"
+              className="px-4 py-2 rounded-md"
+            >
+              Retake Photo
+            </Button>
+          </div>
         ) : (
-          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-            {/* User ID field */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="userId" className="text-right">
-                User ID
-              </Label>
-              <Input
-                id="userId"
-                className="col-span-3"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Footer buttons */}
-            <DialogFooter className="pt-4">
-              <div className="flex justify-between w-full">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleRetake}
-                >
-                  Retake Photo
-                </Button>
-                <Button
-                  type="submit"
-                  className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
-                >
-                  Submit
-                </Button>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {matches.map((user) => (
+              <div
+                key={user.id}
+                className="flex flex-col items-center gap-2"
+              >
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="w-20 h-20 rounded-full object-cover border"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-muted flex items-center justify-center rounded-full border">
+                    <span className="text-xs text-muted-foreground">
+                      No Image
+                    </span>
+                  </div>
+                )}
+                <div className="text-sm font-medium text-center">
+                  {user.firstName} {user.lastName}
+                </div>
               </div>
-            </DialogFooter>
-          </form>
+            ))}
+          </div>
         )}
       </DialogContent>
     </Dialog>

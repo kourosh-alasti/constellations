@@ -9,6 +9,7 @@ import EditProfileButton from "@/components/ui/edit-profile";
 import { redirect, useRouter } from "next/navigation";
 import { LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SendFace from "@/components/ui/send-face";
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -55,6 +56,7 @@ const NodesPage = () => {
   const handleClose = (open: boolean) => {
     setOpen(open);
   };
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     // Generate initial data with current theme
@@ -161,15 +163,24 @@ const NodesPage = () => {
             <h3 className="text-lg font-bold mb-2 font-space">
               Celestial Actions
             </h3>
-            <button
-              className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
-              onClick={() => setOpen(true)}
-            >
-              Add New Star
-            </button>
+            <div className="flex justify-between gap-2">
+              <button
+                className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
+                onClick={() => setOpen(true)}
+              >
+                Add New Star
+              </button>
+              <button
+                className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow w-1/2"
+                onClick={() => setSearchOpen(true)}
+              >
+                Search The Stars
+              </button>
+            </div>
           </div>
         </div>
         <CameraDialog open={open} onOpenChange={handleClose} />
+        <SendFace open={searchOpen} onOpenChange={setSearchOpen} />
       </main>
     </div>
   );
