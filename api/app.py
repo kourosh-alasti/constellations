@@ -1,6 +1,8 @@
 from fastapi import FastAPI, File, HTTPException
 from typing import Annotated
-
+import base64
+from io import BytesIO
+from PIL import Image
 from models import BaseNode, NodeCreate, Node
 from db import Conn, create_db_and_tables
 
@@ -36,8 +38,17 @@ def new_user(new_node: NodeCreate, session: Conn):
     Parameters:
     first_name: first name of the new user
     last_name: last name of the new user
-    image: base64 encoded image file
+    image: base64 encoded jpg image
     """
+
+    image = new_node.image
+    image_decoded = base64.b64decode(image)
+
+    image_file = BytesIO(image_decoded)
+    image_file = Image.open(image_file)
+    image_file.save(f'{new_node.first_name}_{new_node.last_name}.jpg')
+    image_file.close()
+
     node_db = Node.model_validate(new_node)
 
     session.add(node_db)
