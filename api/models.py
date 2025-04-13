@@ -61,9 +61,9 @@ class AuthRequest(BaseModel):
 class NodePublic(BaseModel):
     id: int
     name: str
-    x: int = Field(default_factory=lambda: random.randint(500, 1000))
-    y: int  = Field(default_factory=lambda: random.randint(500, 800))
-    vx: int = Field(default=0)
-    vy: int = Field(default=0)
+    x: int = Field(default_factory=lambda: 10 * random.randint(-1000, 1000))
+    y: int  = Field(default_factory=lambda: 10 * random.randint(-800, 800))
+    vx: int = Field(default=1)
+    vy: int = Field(default=1)
     color: str = Field(default='ffffff')
     size: int = Field(default=1)
