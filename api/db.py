@@ -7,6 +7,9 @@ import os
 
 load_dotenv()
 CONNECTION_URL = os.getenv('POSTGRES_URL')
+if not CONNECTION_URL:
+    raise ValueError("The 'POSTGRES_URL' environment variable is not set. Please set it to a valid database URL.")
+
 conn_url = f"{CONNECTION_URL}"  
 
 # CONNECTION_URL = "constellations.db"
