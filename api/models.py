@@ -23,12 +23,12 @@ class Node(BaseNode, table=True):
 # Edge
 # TODO: Fill in relationship deps
 
-class BaseEdge(SQLModel):
-    user_1: int = Field(foreign_key=True)
-    user_2: int = Field(foreign_key=True)
-
-class Edge(BaseEdge, table=True):
-    pass
+# class BaseEdge(SQLModel):
+#     user_1: int = Field(foreign_key=True)
+#     user_2: int = Field(foreign_key=True)
+#
+# class Edge(BaseEdge, table=True):
+#     pass
 
 # api request/response models 
 class GetNode(BaseModel):
