@@ -2,6 +2,7 @@
 
 import React, { useRef, useCallback, useState, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
+import * as d3 from 'd3';
 import {
   Dialog,
   DialogContent,
@@ -275,13 +276,14 @@ export const Graph = ({ data, width, height }: GraphProps) => {
     }
 
     // Add node name label
-    ctx.font = "10px system-ui, sans-serif";
+    ctx.font = "8px system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = themeMode.text;
 
-    // Draw text with slight offset above the node
-    ctx.fillText(node.name, node.x!, node.y! - outerRadius - 5);
+    // Draw text with slight offset above the node, showing only first name
+    const firstName = node.name.split(' ')[0];
+    ctx.fillText(firstName, node.x!, node.y! - outerRadius - 5);
   }
 
   // Link styling
@@ -422,10 +424,31 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         onNodeHover={handleNodeHover}
         onNodeClick={handleNodeClick}
         onBackgroundClick={handleBackgroundClick}
-        cooldownTicks={200}
-        d3AlphaDecay={0.01} // Slower decay = more time to spread out
-        d3VelocityDecay={0.2} // Lower value = nodes move more freely
-        minZoom={1}
+        cooldownTicks={300}
+        d3AlphaDecay={0.001} // Even slower decay for much smoother transitions
+        d3VelocityDecay={0.08} // Slightly higher to dampen sudden movements
+        warmupTicks={100}
+        onEngineStop={() => {
+          console.log("Graph physics settled");
+        }}
+        d3Force={(engine: any) => {
+          engine.force('charge')
+            .strength(-30) // Even weaker repulsion
+            .distanceMax(500); // Longer distance for charge effect
+          
+          engine.force('link')
+            .distance(200)
+            .strength(0.1); // Much weaker link force for smoother movement
+          
+          engine.force('center')
+            .strength(0.005); // Very gentle centering force
+          
+          // Add collision force to prevent overlap but keep it very gentle
+          engine.force('collision')
+            .radius(20)
+            .strength(0.1);
+        }}
+        minZoom={0.5}
         maxZoom={4}
       />
 
@@ -447,8 +470,8 @@ export const Graph = ({ data, width, height }: GraphProps) => {
             border: `1px solid ${themeMode.linkHighlight}40`,
           }}
         >
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: "bold" }}>
-            {selectedNode.name}
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: "bold" }}>
+            {selectedNode.name.split(' ')[0]}
           </h3>
           <p style={{ margin: "8px 0 0", fontSize: 14, opacity: 0.7 }}>
             {selectedNode.neighbors?.length || 0} connection
