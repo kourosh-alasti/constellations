@@ -100,6 +100,7 @@ export default function CameraDialog({
 
       const data = await res.json();
       console.log("Upload successful!", data);
+      location.reload();
 
       // reset everything
       onOpenChange(false);

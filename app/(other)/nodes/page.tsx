@@ -6,7 +6,9 @@ import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import CameraDialog from "@/components/ui/camera-dialog";
 import EditProfileButton from "@/components/ui/edit-profile";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { LogOutIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -39,6 +41,7 @@ interface GraphData {
 }
 
 const NodesPage = () => {
+  const router = useRouter();
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
     edges: [],
@@ -90,7 +93,7 @@ const NodesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-space text-foreground">
+    <div className="min-h-screen text-foreground">
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -102,6 +105,16 @@ const NodesPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow flex flex-row gap-1"
+              onClick={() => {
+                localStorage.removeItem("user_id");
+                router.replace("/login");
+              }}
+            >
+              <LogOutIcon />
+              Log Out
+            </Button>
             <EditProfileButton />
             <ThemeToggle />
           </div>
