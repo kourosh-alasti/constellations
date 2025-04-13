@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from pgvector.sqlalchemy import Vector
-from typing import Any
+from typing import Any, List, Optional
+import random
 
 # Node
 class BaseNode(SQLModel):
@@ -20,20 +21,56 @@ class Node(BaseNode, table=True):
     id: int | None = Field(default=None, primary_key=True)
     embed: Any = Field(default=None, sa_type=Vector(512))
 
+    # Relationships
+    source_edges: List["Edge"] = Relationship(
+        back_populates="source_node",
+        sa_relationship_kwargs={"foreign_keys": "Edge.source"}
+    )
+    target_edges: List["Edge"] = Relationship(
+        back_populates="target_node",
+        sa_relationship_kwargs={"foreign_keys": "Edge.target"}
+    )
+
+
 # Edge
-# TODO: Fill in relationship deps
 
-# class BaseEdge(SQLModel):
-#     user_1: int = Field(foreign_key=True)
-#     user_2: int = Field(foreign_key=True)
-#
-# class Edge(BaseEdge, table=True):
-#     pass
+class Edge(SQLModel, table=True):
+    source: int = Field(foreign_key="node.id", primary_key=True)
+    target: int = Field(foreign_key="node.id", primary_key=True)
+    value: int = Field(default=1)
+    
+    # Relationships
+    source_node: Optional[Node] = Relationship(
+        back_populates="source_edges",
+        sa_relationship_kwargs={"foreign_keys": "Edge.source"}
+    )
+    target_node: Optional[Node] = Relationship(
+        back_populates="target_edges",
+        sa_relationship_kwargs={"foreign_keys": "Edge.target"}
+    )
 
-# api request/response models 
+
+# Auth
+class AuthRequest(BaseModel):
+    # Temp model for simple auth
+    first_name: str
+    last_name: str
+
+# API request/response models 
 class GetNode(BaseModel):
     """
     Response for get_users endpoints
 
     a list of users in a related constellation
     """
+    pass
+
+class NodePublic(BaseModel):
+    id: int
+    name: str
+    x: int = Field(default_factory=lambda: random.randint(0, 1000))
+    y: int  = Field(default_factory=lambda: random.randint(0, 800))
+    vx: int = Field(default=0)
+    vy: int = Field(default=0)
+    color: str = Field(default='ffffff')
+    size: int = Field(default=1)

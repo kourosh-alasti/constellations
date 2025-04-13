@@ -1,5 +1,4 @@
 from facenet_pytorch import InceptionResnetV1
-import torch
 from PIL import Image
 from torchvision import transforms
 from typing import List
@@ -9,8 +8,6 @@ from functools import lru_cache
 @lru_cache()
 def get_facenet_model():
     return InceptionResnetV1(pretrained='vggface2').eval()
-
-# model = InceptionResnetV1(pretrained='vggface2').eval()
 
 transform = transforms.Compose([
     transforms.Resize((160, 160)),
