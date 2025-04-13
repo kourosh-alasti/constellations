@@ -68,8 +68,8 @@ class GetNode(BaseModel):
 class NodePublic(BaseModel):
     id: int
     name: str
-    x: int = Field(default_factory=lambda: random.randint(0, 1000))
-    y: int  = Field(default_factory=lambda: random.randint(0, 800))
+    x: int = Field(default_factory=lambda: random.randint(500, 1000))
+    y: int  = Field(default_factory=lambda: random.randint(500, 800))
     vx: int = Field(default=0)
     vy: int = Field(default=0)
     color: str = Field(default='ffffff')
