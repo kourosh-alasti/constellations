@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, Depends
+from fastapi import FastAPI, File, Depends, HTTPException
 from typing import Annotated
 from sqlmodel import Session
 
@@ -17,12 +17,17 @@ def index(): return 'go to /api/py/docs'
 def get_face(photo: Annotated[bytes, File()]):
     ... 
 
-@app.get('/Node', response_model=BaseNode)
-def get_user(id: int):
-    ...
+@app.get('/node/{user_id}', response_model=BaseNode)
+def get_user(user_id: int, session: Conn):
 
+    user = session.get(Node, user_id)
+     
+    if not user:
+        raise HTTPException(status_code=404, detail='User not found')
 
-@app.post('/Node')
+    return user
+
+@app.post('/node')
 def new_user(new_node: NodeCreate, session: Conn):
     """
     creates a new user node.
