@@ -20,4 +20,4 @@ def gen_embed(image_path: str, model) -> List[float]:
     img = Image.open(image_path)
     img_tensor = transform(img).unsqueeze(0)
 
-    return model(img_tensor).tolist()
+    return model(img_tensor).tolist()[0]
