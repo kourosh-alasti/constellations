@@ -1,13 +1,23 @@
-import WebcamCapture from "@/components/ui/camera";
-import { Label } from "@/components/ui/label";
+"use client";
 
-export default function Camera() {
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import CameraDialog from "@/components/ui/camera-dialog"; // <-- import the new component
+
+export default function Page() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
-      <div className="overflow-hidden rounded-lg border shadow-lg bg-stone-800 p-4">
-        <WebcamCapture />
-        <Label className="text-white">TAKING A PHOTO</Label>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-background gap-4">
+      <h1 className="text-2xl font-bold">Welcome to the Photo Capture</h1>
+
+      {/* ANY button can now control the dialog */}
+      <Button variant="default" onClick={() => setOpen(true)}>
+        Open Camera
+      </Button>
+
+      {/* CameraDialog controlled by parent */}
+      <CameraDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }
