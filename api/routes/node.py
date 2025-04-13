@@ -39,13 +39,19 @@ def match_face(face: FaceRequest, session: Conn):
 
     embed = gen_embed(saved_file, get_facenet_model())[0]
 
-    closest = session.exec(select(Node).order_by(Node.embed.l2_distance(embed)).limit(3)) 
+    closest = session.exec(select(Node).order_by(Node.embed.l2_distance(embed)).limit(10)) 
 
     if not closest:
         raise HTTPException(status_code=400, detail='Failed to fetch closest faces')
 
-    print(closest.all())
-    return closest.all()
+    candidates = closest.all()
+
+    return [{
+        'id': candidate.id,
+        'name': f"{candidate.first_name} {candidate.last_name}",
+        'image': candidate.image,
+        'distance': candidate.embed.l2_distance(embed)
+    } for candidate in candidates]
 
 
 @router.get('/node/{user_id}', response_model=BaseNode)
