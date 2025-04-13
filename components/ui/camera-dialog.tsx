@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +21,24 @@ interface CameraDialogProps {
 }
 
 export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) {
+  const [introDone, setIntroDone] = useState(false);
   const [photoCaptured, setPhotoCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [relation, setRelation] = useState("");
+
+  // clear fields when dialog closed
+  useEffect(() => {
+    if (!open) {
+      setIntroDone(false);
+      setPhotoCaptured(false);
+      setCapturedImage(null);
+      setFirstName("");
+      setLastName("");
+      setRelation("");
+    }
+  }, [open]);
 
   // after photo captured
   const handlePhotoCaptured = (image: string) => {
@@ -53,13 +65,13 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
       first_name: firstName,
       last_name: lastName,
       image: capturedImage,
-      color: "#ffffff",
+      // color: "#ffffff",
     };
 
     console.log("Submitting payload:", payload);
 
     try {
-      const res = await fetch("api/py/node", {
+      const res = await fetch("/api/py/node", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,11 +87,6 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
       // reset everything
       onOpenChange(false);
-      setPhotoCaptured(false);
-      setCapturedImage(null);
-      setFirstName("");
-      setLastName("");
-      setRelation("");
     } catch (error) {
       console.error("Upload error:", error);
     }
@@ -87,20 +94,34 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-black border border-gray-400 text-white rounded-xl">
+      <DialogContent className="sm:max-w-[425px] rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-white">
-            {!photoCaptured ? "Take a Photo" : "Enter Person Details"}
+          <DialogTitle>
+            {!introDone
+              ? "Add a Star to Your Galaxy"
+              : !photoCaptured
+                ? "Take a Photo"
+                : "Enter Details"}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
-            {!photoCaptured
-              ? "Position yourself in the frame. We'll capture automatically."
-              : "Fill out the person's information after capturing their photo."}
+          <DialogDescription>
+            {!introDone
+              ? "Ready to shine? Make sure your star is centered and alone!"
+              : !photoCaptured
+                ? "Position yourself carefully in the frame. We'll capture automatically."
+                : "Fill out the person's information after capturing their photo."}
           </DialogDescription>
         </DialogHeader>
 
-        {/* content */}
-        {!photoCaptured ? (
+        {!introDone ? (
+          <div className="flex flex-col items-center gap-4 py-6">
+            <Button
+              onClick={() => setIntroDone(true)}
+              className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
+            >
+              Start Camera
+            </Button>
+          </div>
+        ) : !photoCaptured ? (
           <div className="flex flex-col items-center">
             <WebcamCapture onPhotoCaptured={handlePhotoCaptured} />
           </div>
@@ -108,10 +129,10 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
             {/* first name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="firstName" className="text-right text-white">First Name</Label>
+              <Label htmlFor="firstName" className="text-right">First Name</Label>
               <Input
                 id="firstName"
-                className="col-span-3 bg-neutral-900 text-white"
+                className="col-span-3"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
@@ -120,10 +141,10 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
             {/* last name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="lastName" className="text-right text-white">Last Name</Label>
+              <Label htmlFor="lastName" className="text-right">Last Name</Label>
               <Input
                 id="lastName"
-                className="col-span-3 bg-neutral-900 text-white"
+                className="col-span-3"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
@@ -132,19 +153,19 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
 
             {/* relation */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="relation" className="text-right text-white">Relation</Label>
+              <Label htmlFor="relation" className="text-right">Relation</Label>
               <div className="col-span-3">
                 <Select
                   value={relation}
                   onValueChange={(value) => setRelation(value)}
                   required
                 >
-                  <SelectTrigger id="relation" className="bg-neutral-900 text-white rounded-md p-2 w-full">
-                    <SelectValue placeholder="Select relation..." />
+                  <SelectTrigger id="relation" className="rounded-md p-2 w-full pl-3">
+                    <SelectValue placeholder="Select relationship" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 text-white rounded-md">
-                    <SelectItem value="Friend">Friend</SelectItem>
+                  <SelectContent className="rounded-md">
                     <SelectItem value="Family">Family</SelectItem>
+                    <SelectItem value="Friend">Friend</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -158,15 +179,14 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
                   type="button"
                   variant="secondary"
                   onClick={handleRetake}
-                  className="bg-gray-700 text-white hover:bg-gray-600"
                 >
                   Retake Photo
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-white text-black hover:bg-gray-200"
+                  className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
                 >
-                  Save Details
+                  Add Star
                 </Button>
               </div>
             </DialogFooter>

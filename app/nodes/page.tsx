@@ -5,6 +5,7 @@ import Head from "next/head";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import CameraDialog from "@/components/ui/camera-dialog"; // <-- import the new component
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -105,6 +106,12 @@ const NodesPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
 
+  // dialog
+  const [open, setOpen] = useState(false);
+  const handleClose = (open: boolean) => {
+    setOpen(open);
+  };
+
   useEffect(() => {
     // Generate initial data with current theme
     setGraphData(generateData(15, theme));
@@ -184,11 +191,12 @@ const NodesPage = () => {
             <h3 className="text-lg font-bold mb-2 font-space">
               Celestial Actions
             </h3>
-            <button className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow">
+            <button className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow" onClick={() => setOpen(true)}>
               Add New Star
             </button>
           </div>
         </div>
+        <CameraDialog open={open} onOpenChange={handleClose} />
       </main>
     </div>
   );
