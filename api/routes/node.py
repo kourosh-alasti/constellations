@@ -34,13 +34,9 @@ def match_face(face: FaceRequest, session: Conn):
         else:
             image_data = face.image
 
-<<<<<<< Updated upstream
-    filename = str(uuid4())
-=======
         # Generate a safer filename
         import uuid
         filename = str(uuid.uuid4())
->>>>>>> Stashed changes
 
         # Save and process image
         image_decoded = base64.b64decode(image_data)
@@ -55,21 +51,6 @@ def match_face(face: FaceRequest, session: Conn):
         image_file.save(saved_file)
         image_file.close()
 
-<<<<<<< Updated upstream
-    closest = session.exec(select(Node).order_by(Node.embed.l2_distance(embed)).limit(10)) 
-
-    if not closest:
-        raise HTTPException(status_code=400, detail='Failed to fetch closest faces')
-
-    candidates = closest.all()
-
-    return [{
-        'id': candidate.id,
-        'name': f"{candidate.first_name} {candidate.last_name}",
-        'image': candidate.image,
-        'distance': candidate.embed.l2_distance(embed)
-    } for candidate in candidates]
-=======
         # Generate embedding
         embed = gen_embed(saved_file, get_facenet_model())[0]
 
@@ -113,7 +94,14 @@ def match_face(face: FaceRequest, session: Conn):
         import traceback
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error matching face: {str(e)}")
->>>>>>> Stashed changes
+    finally:
+        # Clean up the temporary file if it exists
+        try:
+            if 'saved_file' in locals() and os.path.exists(saved_file):
+                os.remove(saved_file)
+        except Exception as e:
+            print(f"Error removing temporary file: {str(e)}")
+        
 
 
 @router.get('/node/{user_id}', response_model=BaseNode)
