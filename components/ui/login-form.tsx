@@ -14,31 +14,30 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 
 // Define form schema with Zod
 const formSchema = z.object({
-  username: z.string().min(1, { message: "Username is required" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+  firstName: z.string(),
+  lastName: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface LoginFormProps {
-  onSuccess?: () => void;
   onError?: (error: string) => void;
 }
 
-export function LoginForm({ onSuccess, onError }: LoginFormProps) {
+export function LoginForm({ onError }: LoginFormProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      firstName: "",
+      lastName: "",
     },
   });
 
@@ -52,7 +51,10 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          first_name: data.firstName,
+          last_name: data.lastName,
+        }),
       });
 
       const result = await response.json();
@@ -61,9 +63,13 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
         throw new Error(result.message || "Authentication failed");
       }
 
-      // Call success callback if provided
-      if (onSuccess) {
-        onSuccess();
+      if (result.id) {
+        localStorage.setItem("user_id", result.id);
+        router.push("/nodes");
+      } else {
+        if (onError) {
+          onError("No ID Returned.");
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -92,12 +98,12 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="username"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your username" {...field} />
+                  <Input placeholder="Enter your first name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -106,14 +112,14 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
 
           <FormField
             control={form.control}
-            name="password"
+            name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>LastName</FormLabel>
                 <FormControl>
                   <Input
-                    type="password"
-                    placeholder="Enter your password"
+                    type="text"
+                    placeholder="Enter your last name"
                     {...field}
                   />
                 </FormControl>
