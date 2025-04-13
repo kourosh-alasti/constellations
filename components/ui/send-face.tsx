@@ -1,133 +1,156 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import WebcamCapture from "@/components/ui/camera";
 
-export function StarCard() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [base64, setBase64] = useState<string | null>(null);
+interface SendFaceProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-  const userId = "0"; // (you can pass this dynamically later if you want)
+export default function SendFace({ open, onOpenChange }: SendFaceProps) {
+  const [introDone, setIntroDone] = useState(false);
+  const [photoCaptured, setPhotoCaptured] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [userId, setUserId] = useState("");
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-
-      const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
-
-      convertToBase64(file);
+  // Reset fields when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setIntroDone(false);
+      setPhotoCaptured(false);
+      setCapturedImage(null);
+      setUserId("");
     }
+  }, [open]);
+
+  const handlePhotoCaptured = (image: string) => {
+    setCapturedImage(image);
+    setPhotoCaptured(true);
   };
 
-  const convertToBase64 = (file: File) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      setBase64(reader.result as string);
-    };
+  const handleRetake = () => {
+    setPhotoCaptured(false);
+    setCapturedImage(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !base64) {
-      alert("Please fill all fields and upload an image!");
+    if (!capturedImage || !userId) {
+      console.error("Photo or User ID missing!");
       return;
     }
 
     const payload = {
       user_id: userId,
-      first_name: firstName,
-      last_name: lastName,
-      image: base64,
+      image: capturedImage,
     };
 
-    console.log("Sending payload:", payload);
+    console.log("Submitting payload:", payload);
 
     try {
-      const res = await fetch("/api/profile", {
+      const res = await fetch("/api/py/node/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          accept: "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to submit");
+      if (!res.ok) throw new Error("Failed to upload data");
 
       const data = await res.json();
-      console.log("Server response:", data);
+      console.log("Upload successful!", data);
 
-      setFirstName("");
-      setLastName("");
-
-      alert("Profile updated successfully!");
+      onOpenChange(false);
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong!");
+      console.error("Upload error:", error);
     }
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Add Star</CardTitle>
-      </CardHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px] rounded-xl">
+        <DialogHeader>
+          <DialogTitle>
+            {!introDone
+              ? "Add a Star to Your Galaxy"
+              : !photoCaptured
+              ? "Take a Photo"
+              : "Enter Your User ID"}
+          </DialogTitle>
+          <DialogDescription>
+            {!introDone
+              ? "Ready to shine? Make sure your star is centered and alone!"
+              : !photoCaptured
+              ? "Position yourself carefully in the frame. We'll capture automatically."
+              : "Enter your user ID to upload your photo."}
+          </DialogDescription>
+        </DialogHeader>
 
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              placeholder="Enter first name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
+        {!introDone ? (
+          <div className="flex flex-col items-center gap-4 py-6">
+            <Button
+              onClick={() => setIntroDone(true)}
+              className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
+            >
+              Start Camera
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              placeholder="Enter last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
+        ) : !photoCaptured ? (
+          <div className="flex flex-col items-center">
+            <WebcamCapture onPhotoCaptured={handlePhotoCaptured} />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="image">Image</Label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            {preview && (
-              <img
-                src={preview}
-                alt="Preview"
-                className="mt-4 rounded-md border w-32 h-32 object-cover"
+        ) : (
+          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+            {/* User ID field */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="userId" className="text-right">
+                User ID
+              </Label>
+              <Input
+                id="userId"
+                className="col-span-3"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                required
               />
-            )}
-          </div>
-        </CardContent>
+            </div>
 
-        <CardFooter>
-          <Button type="submit" className="w-full mt-2">
-            Submit
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+            {/* Footer buttons */}
+            <DialogFooter className="pt-4">
+              <div className="flex justify-between w-full">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleRetake}
+                >
+                  Retake Photo
+                </Button>
+                <Button
+                  type="submit"
+                  className="hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow"
+                >
+                  Submit
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
