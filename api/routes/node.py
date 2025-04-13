@@ -19,8 +19,77 @@ class FaceRequest(BaseModel):
     image: str # This is a base64 encoded jpg image
 
 
+
 @router.post('/match-face/{user_id}')
 def match_face(face: FaceRequest, session: Conn):
+    SIMILARITY_THRESHOLD = 0.6  # Adjust this threshold as needed (0-1)
+
+    try:
+        # Process image
+        if face.image.startswith('data:image'):
+            image_data = face.image.split(',', 1)[1]
+        else:
+            image_data = face.image
+
+        # Generate a safer filename
+        import uuid
+        filename = str(uuid.uuid4())
+
+        # Save and process image
+        image_decoded = base64.b64decode(image_data)
+        saved_file = f'uploads/temp/{filename}.jpg'
+
+        # Ensure directory exists
+        import os
+        os.makedirs('uploads/temp', exist_ok=True)
+
+        image_file = BytesIO(image_decoded)
+        image_file = Image.open(image_file)
+        image_file.save(saved_file)
+        image_file.close()
+
+        # Generate embedding
+        embed = gen_embed(saved_file, get_facenet_model())[0]
+
+        # Use direct SQL with pgvector's distance function
+        from sqlalchemy import text, func
+        from sqlalchemy.sql import select as sa_select
+        
+        # Get only the closest match
+        stmt = select(
+            Node.id, 
+            Node.embed.l2_distance(embed).label("distance")
+        ).order_by(
+            Node.embed.l2_distance(embed)
+        ).limit(1)
+        
+        result = session.exec(stmt)
+        match = result.first()
+        
+        if not match:
+            return {"match_id": -1}
+            
+        # Convert distance to similarity score (0-1)
+        similarity_score = 1.0 / (1.0 + float(match.distance))
+        
+        # Return -1 if below threshold, otherwise return the match ID
+        return {"match_id": match.id if similarity_score >= SIMILARITY_THRESHOLD else -1}
+        
+    except Exception as e:
+        print(f"Error in match_face: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Error matching face: {str(e)}")
+    finally:
+        # Clean up the temporary file if it exists
+        try:
+            if 'saved_file' in locals() and os.path.exists(saved_file):
+                os.remove(saved_file)
+        except Exception as e:
+            print(f"Error removing temporary file: {str(e)}")
+
+@router.post('/match-face_results/{user_id}')
+def match_face_results(face: FaceRequest, session: Conn):
     """
     Match a face against the database and return the closest matches
     
