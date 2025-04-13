@@ -1,14 +1,15 @@
-from fastapi import FastAPI, File, Depends, HTTPException
+from fastapi import FastAPI, File, HTTPException
 from typing import Annotated
-from sqlmodel import Session
 
 from models import BaseNode, NodeCreate, Node
-from db import Conn
-
+from db import Conn, create_db_and_tables
 
 ### Create FastAPI instance with custom docs and openapi url
 app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
 
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 @app.get('/')
 def index(): return 'go to /api/py/docs'

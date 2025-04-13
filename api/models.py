@@ -1,13 +1,19 @@
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
-
+from pgvector.sqlalchemy import Vector
+from typing import Any
 
 # Node
 class BaseNode(SQLModel):
     first_name: str
     last_name: str
     image: str # This is a base64 encoded jpg image
+    embed: Any = Field(sa_type=Vector(1))
     color: str = Field(default='#ffffff')
+
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class NodeCreate(BaseNode):
     pass
