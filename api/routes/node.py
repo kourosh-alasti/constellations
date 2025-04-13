@@ -3,8 +3,8 @@ from typing import Annotated
 from io import BytesIO
 from PIL import Image
 import base64
-import random
 from pydantic import BaseModel, Field
+from sqlmodel import select
 
 # from ..face import gen_embed
 from ..face import get_facenet_model, gen_embed
@@ -12,9 +12,39 @@ from ..models import BaseNode, NodeCreate, Node, Edge, NodePublic
 from ..db import Conn 
 
 
-
-
 router = APIRouter(prefix="/api/py")
+
+class FaceRequest(BaseModel):
+    image: str # This is a base64 encoded jpg image
+
+
+@router.post('/match-face/{user_id}')
+def match_face(face: FaceRequest, session: Conn):
+    
+    if face.image.startswith('data:image'):
+        image_data = face.image.split(',', 1)[1]
+    else:
+        image_data = face.image
+
+    filename = face.image[:15]
+
+    image_decoded = base64.b64decode(image_data)
+    saved_file = f'uploads/temp/{filename}.jpg'
+
+    image_file = BytesIO(image_decoded)
+    image_file = Image.open(image_file)
+    image_file.save(saved_file)
+    image_file.close()
+
+    embed = gen_embed(saved_file, get_facenet_model())[0]
+
+    closest = session.exec(select(Node).order_by(Node.embed.l2_distance(embed)).limit(3)) 
+
+    if not closest:
+        raise HTTPException(status_code=400, detail='Failed to fetch closest faces')
+
+    print(closest.all())
+    return closest.all()
 
 
 @router.get('/node/{user_id}', response_model=NodePublic)
