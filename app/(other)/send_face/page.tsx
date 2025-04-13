@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import SendFace from "@/components/ui/send-face";
+import TestFace from "@/components/ui/test-face";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -15,7 +15,7 @@ export default function Page() {
         Open Camera
       </Button>
 
-      <SendFace open={open} onOpenChange={setOpen} />
+      <TestFace open={open} onOpenChange={setOpen} />
     </div>
   );
 }
