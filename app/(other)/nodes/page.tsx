@@ -9,7 +9,7 @@ import EditProfileButton from "@/components/ui/edit-profile";
 import { redirect, useRouter } from "next/navigation";
 import { LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SendFace from "@/components/ui/send-face";
+import SearchFace from "@/components/ui/search-face";
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -180,7 +180,7 @@ const NodesPage = () => {
           </div>
         </div>
         <CameraDialog open={open} onOpenChange={handleClose} />
-        <SendFace open={searchOpen} onOpenChange={setSearchOpen} />
+        <SearchFace open={searchOpen} onOpenChange={setSearchOpen} />
       </main>
     </div>
   );

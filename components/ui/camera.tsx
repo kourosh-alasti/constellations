@@ -86,6 +86,9 @@ export const WebcamCapture = ({ onPhotoCaptured }: WebcamCaptureProps) => {
         screenshotFormat="image/jpeg"
         width={1280}
         videoConstraints={videoConstraints}
+        style={{
+          transform: "scaleX(-1)",
+        }}
       />
 
       {/* detection banner */}

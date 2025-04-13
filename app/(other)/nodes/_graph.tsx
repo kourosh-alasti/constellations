@@ -193,7 +193,6 @@ export const Graph = ({ data, width, height }: GraphProps) => {
     }
   }, [data, themeMode.node]);
 
-  // Add function to fetch node data
   const fetchNodeData = useCallback(async (nodeId: number) => {
     // If data is already cached, don't fetch again
     if (cachedDataRef.current.has(nodeId)) {
@@ -202,25 +201,34 @@ export const Graph = ({ data, width, height }: GraphProps) => {
 
     setIsLoading(true);
     try {
-      // Simulate API call - replace with your actual API endpoint
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            id: nodeId,
-            details: {
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              status: "Active",
-              connections: Math.floor(Math.random() * 20) + 1,
-              description: `Detailed information about node ${nodeId}`,
-            },
-          });
-        }, 300); // Simulate network delay
+      // Make actual API call to fetch node details
+      const res = await fetch(`/api/py/node/${nodeId}`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
       });
 
+      if (!res.ok) throw new Error("Failed to fetch node details");
+
+      const userData = await res.json();
+
+      // Transform API response to match our node details format
+      const nodeData = {
+        id: userData.id,
+        details: {
+          firstName: userData.first_name,
+          lastName: userData.last_name,
+          createdAt: userData.created_at || new Date().toISOString(),
+          updatedAt: userData.updated_at || new Date().toISOString(),
+          status: userData.status || "Active",
+          connections: userData.connections || 0,
+          description: userData.description || `User ${userData.first_name} ${userData.last_name}`,
+          image: userData.image ? `data:image/jpeg;base64,${userData.image}` : null,
+        }
+      };
+
       // Cache the result
-      cachedDataRef.current.set(nodeId, response);
-      return response;
+      cachedDataRef.current.set(nodeId, nodeData);
+      return nodeData;
     } catch (error) {
       console.error("Error fetching node data:", error);
       return null;
@@ -476,7 +484,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{selectedNode?.name}</DialogTitle>
-            <DialogDescription>Node details and information</DialogDescription>
+            <DialogDescription>User details</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
@@ -486,15 +494,28 @@ export const Graph = ({ data, width, height }: GraphProps) => {
               </div>
             ) : nodeDetails ? (
               <div className="space-y-4">
+                {/* User image */}
+                {nodeDetails.details.image && (
+                  <div className="flex justify-center">
+                    <div className="w-24 h-24 rounded-full overflow-hidden">
+                      <img
+                        src={nodeDetails.details.image}
+                        alt={`${nodeDetails.details.firstName} ${nodeDetails.details.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-2">
                   <div className="text-sm font-medium">ID</div>
-                  <div>{nodeDetails.id}</div>
+                  <div>{selectedNode?.id}</div>
 
                   <div className="text-sm font-medium">Status</div>
                   <div>{nodeDetails.details.status}</div>
 
                   <div className="text-sm font-medium">Connections</div>
-                  <div>{nodeDetails.details.connections}</div>
+                  <div>{selectedNode?.neighbors?.length || 0}</div>
 
                   <div className="text-sm font-medium">Created</div>
                   <div>

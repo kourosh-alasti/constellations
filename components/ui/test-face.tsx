@@ -10,16 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import WebcamCapture from "@/components/ui/camera";
 
-interface SendFaceProps {
+interface TestFaceProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function SendFace({ open, onOpenChange }: SendFaceProps) {
+export default function TestFace({ open, onOpenChange }: TestFaceProps) {
   const [introDone, setIntroDone] = useState(false);
   const [photoCaptured, setPhotoCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
