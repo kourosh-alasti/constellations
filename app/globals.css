@@ -8,37 +8,66 @@
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Direct color definitions for light mode */
+  --background: #fdf6e3;
+  --foreground: #2d3748;
+  --card: #fff8ea;
+  --card-foreground: #2d3748;
+  --popover: #fffaf0;
+  --popover-foreground: #2d3748;
+  --primary: #f59e0b;
+  --primary-foreground: #fffaf0;
+  --secondary: #fef3c7;
+  --secondary-foreground: #d97706;
+  --muted: #fef3c7;
+  --muted-foreground: #92400e;
+  --accent: #fef3c7;
+  --accent-foreground: #d97706;
+  --destructive: #ef4444;
+  --border: rgba(234, 179, 8, 0.2);
+  --input: rgba(234, 179, 8, 0.2);
+  --ring: #f59e0b;
+  --chart-1: #f59e0b;
+  --chart-2: #d97706;
+  --chart-3: #f97316;
+  --chart-4: #ea580c;
+  --chart-5: #fdba74;
+  --sidebar: #fffaf0;
+  --sidebar-foreground: #2d3748;
+  --sidebar-primary: #f59e0b;
+  --sidebar-primary-foreground: #fffaf0;
+  --sidebar-accent: #fef3c7;
+  --sidebar-accent-foreground: #d97706;
+  --sidebar-border: rgba(234, 179, 8, 0.2);
+  --sidebar-ring: #f59e0b;
+
+  /* Light mode stars - solar system */
+  --sun-color-1: #f59e0b;
+  --sun-color-2: #d97706;
+  --sun-color-3: #f97316;
+  --sun-color-4: #ea580c;
+  --sun-color-5: #fdba74;
+  --solar-flare-1: rgba(245, 158, 11, 0.15);
+  --solar-flare-2: rgba(249, 115, 22, 0.1);
+  --solar-flare-3: rgba(217, 119, 6, 0.1);
+  --morning-space-gradient: linear-gradient(
+    to bottom,
+    #fffbeb,
+    #fef3c7,
+    #fffbeb
+  );
+
+  /* Star colors for dark mode - defined here to ensure they're always available */
+  --star-color-1: #8be9fd;
+  --star-color-2: #bd93f9;
+  --star-color-3: #ff79c6;
+  --star-color-4: #50fa7b;
+  --star-color-5: #f1fa8c;
+  --nebula-color-1: rgba(189, 147, 249, 0.15);
+  --nebula-color-2: rgba(139, 233, 253, 0.15);
+  --nebula-color-3: rgba(255, 121, 198, 0.15);
+  --space-gradient: linear-gradient(to bottom, #0d1117, #161b22);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -87,45 +116,204 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Dark mode colors */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0d1117;
+  --foreground: #eceff4;
+  --card: #161b22;
+  --card-foreground: #eceff4;
+  --popover: #161b22;
+  --popover-foreground: #eceff4;
+  --primary: #bd93f9; /* Purple */
+  --primary-foreground: #0d1117;
+  --secondary: #1f2937;
+  --secondary-foreground: #eceff4;
+  --muted: #1f2937;
+  --muted-foreground: #8b949e;
+  --accent: #292e42;
+  --accent-foreground: #bd93f9;
+  --destructive: #ff5555;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #bd93f9;
+  --chart-1: #8be9fd; /* Cyan */
+  --chart-2: #bd93f9; /* Purple */
+  --chart-3: #ff79c6; /* Pink */
+  --chart-4: #50fa7b; /* Green */
+  --chart-5: #f1fa8c; /* Yellow */
+  --sidebar: #161b22;
+  --sidebar-foreground: #eceff4;
+  --sidebar-primary: #bd93f9;
+  --sidebar-primary-foreground: #0d1117;
+  --sidebar-accent: #292e42;
+  --sidebar-accent-foreground: #eceff4;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #bd93f9;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html,
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Dark mode body background */
+  .dark body {
+    background: var(--space-gradient);
+  }
+
+  /* Light mode body background */
+  :root:not(.dark) body {
+    background: var(--morning-space-gradient);
+  }
+}
+
+/* Space theme effects */
+@layer utilities {
+  .bg-space {
+    position: relative;
+  }
+
+  /* Dark mode space background */
+  .dark .bg-space {
+    background: var(--space-gradient);
+    background-size: 200% 200%;
+  }
+
+  /* Light mode space background */
+  :root:not(.dark) .bg-space {
+    background: var(--morning-space-gradient);
+    background-size: 200% 200%;
+  }
+
+  /* Dark mode stars */
+  .dark .bg-space::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(1px 1px at 25% 15%, white, transparent),
+      radial-gradient(1px 1px at 50% 40%, white, transparent),
+      radial-gradient(1.5px 1.5px at 15% 25%, white, transparent),
+      radial-gradient(2px 2px at 75% 35%, white, transparent),
+      radial-gradient(2.5px 2.5px at 30% 65%, white, transparent),
+      radial-gradient(1px 1px at 65% 70%, white, transparent),
+      radial-gradient(1.5px 1.5px at 85% 85%, white, transparent);
+    background-size: 150% 150%;
+    z-index: 0;
+    opacity: 0.15;
+  }
+
+  /* Light mode sun rays and atmosphere */
+  :root:not(.dark) .bg-space::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(
+        circle at 75% 20%,
+        rgba(245, 158, 11, 0.4),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 25% 30%,
+        rgba(249, 115, 22, 0.2),
+        transparent 20%
+      ),
+      radial-gradient(1px 1px at 15% 15%, rgba(245, 158, 11, 0.7), transparent),
+      radial-gradient(1px 1px at 30% 40%, rgba(245, 158, 11, 0.7), transparent),
+      radial-gradient(
+        1.5px 1.5px at 55% 25%,
+        rgba(245, 158, 11, 0.7),
+        transparent
+      ),
+      radial-gradient(2px 2px at 75% 45%, rgba(245, 158, 11, 0.7), transparent),
+      radial-gradient(1px 1px at 85% 85%, rgba(245, 158, 11, 0.7), transparent);
+    background-size: 150% 150%;
+    z-index: 0;
+    opacity: 0.3;
+  }
+
+  .text-gradient {
+    background: linear-gradient(to right, var(--primary), var(--chart-1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Different gradient for light mode */
+  :root:not(.dark) .text-gradient {
+    background: linear-gradient(to right, var(--chart-3), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow {
+    box-shadow: 0 0 10px 0 var(--primary);
+  }
+
+  :root:not(.dark) .glow {
+    box-shadow: 0 0 15px 2px var(--primary);
+  }
+
+  .card-space {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Dark mode card nebula effect */
+  .dark .card-space::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at center,
+      var(--nebula-color-1),
+      var(--nebula-color-2),
+      var(--nebula-color-3),
+      transparent 70%
+    );
+    opacity: 0.05;
+    z-index: 0;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    transform: scale(1.5);
+  }
+
+  /* Light mode card solar flare effect */
+  :root:not(.dark) .card-space::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at center,
+      var(--solar-flare-1),
+      var(--solar-flare-2),
+      var(--solar-flare-3),
+      transparent 70%
+    );
+    opacity: 0.15;
+    z-index: 0;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    transform: scale(1.5);
   }
 }
