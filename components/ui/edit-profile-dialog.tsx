@@ -17,30 +17,50 @@ import WebcamCapture from "@/components/ui/camera";
 interface EditProfileProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    image?: string | null;
-  };
 }
 
-export default function EditProfileDialog({ open, onOpenChange, user }: EditProfileProps) {
-  const [photoCaptured, setPhotoCaptured] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+export default function EditProfileDialog({ open, onOpenChange }: EditProfileProps) {
+  const [userId, setUserId] = useState<number | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [photoCaptured, setPhotoCaptured] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
 
+  // Get user info when dialog opens
   useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName);
-      setLastName(user.lastName);
-      setCapturedImage(user.image || null);
+    if (open) {
+      const id = localStorage.getItem("user_id");
+      if (id) {
+        setUserId(Number(id));
+        fetchUserData(Number(id));
+      }
+    }
+  }, [open]);
+
+  async function fetchUserData(id: number) {
+    try {
+      const res = await fetch(`/api/py/node/${id}`, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user data");
+
+      const user = await res.json();
+      console.log(user)
+
+      setFirstName(user.first_name || "");
+      setLastName(user.last_name || "");
+      setCapturedImage(user.image ? `data:image/jpeg;base64,${user.image}` : null);
       setPhotoCaptured(false);
       setShowCamera(false);
+    } catch (error) {
+      console.error("Fetch user error:", error);
     }
-  }, [user, open]);
+  }
 
   const handlePhotoCaptured = (image: string) => {
     setCapturedImage(image);
@@ -53,6 +73,8 @@ export default function EditProfileDialog({ open, onOpenChange, user }: EditProf
   };
 
   const handleSubmit = async () => {
+    if (!userId) return;
+
     const payload: any = {
       first_name: firstName,
       last_name: lastName,
@@ -63,7 +85,7 @@ export default function EditProfileDialog({ open, onOpenChange, user }: EditProf
     }
 
     try {
-      const res = await fetch(`/api/py/node/${user.id}`, {
+      const res = await fetch(`/api/py/node/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
