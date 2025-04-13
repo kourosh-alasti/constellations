@@ -3,8 +3,9 @@ from typing import Annotated
 import base64
 from io import BytesIO
 from PIL import Image
-from models import BaseNode, NodeCreate, Node
-from db import Conn, create_db_and_tables
+
+from .models import BaseNode, NodeCreate, Node
+from .db import Conn, create_db_and_tables
 
 ### Create FastAPI instance with custom docs and openapi url
 app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
