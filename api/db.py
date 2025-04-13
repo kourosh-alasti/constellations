@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel, Session, create_engine, text
 from fastapi import Depends
 from typing import Annotated
-from models import *
 from dotenv import load_dotenv
 import os
+
+from .models import *
 
 load_dotenv()
 CONNECTION_URL = os.getenv('POSTGRES_URL')

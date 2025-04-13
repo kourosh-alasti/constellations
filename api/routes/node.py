@@ -1,10 +1,11 @@
 from fastapi import APIRouter, File, HTTPException
 from typing import Annotated
-import base64
 from io import BytesIO
 from PIL import Image
-from models import BaseNode, NodeCreate, Node
-from db import Conn 
+import base64
+
+from ..models import BaseNode, NodeCreate, Node
+from ..db import Conn 
 
 router = APIRouter()
 
