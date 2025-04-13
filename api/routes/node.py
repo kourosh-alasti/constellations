@@ -3,34 +3,42 @@ from typing import Annotated
 from io import BytesIO
 from PIL import Image
 import base64
+import random
+from pydantic import BaseModel, Field
 
 # from ..face import gen_embed
 from ..face import get_facenet_model, gen_embed
-from ..models import BaseNode, NodeCreate, Node
+from ..models import BaseNode, NodeCreate, Node, Edge, NodePublic
 from ..db import Conn 
+
+
+
 
 router = APIRouter(prefix="/api/py")
 
-@router.get('/face')
-def get_face(photo: Annotated[bytes, File()]):
-    ... 
 
-@router.get('/node/{user_id}', response_model=BaseNode)
+@router.get('/node/{user_id}', response_model=NodePublic)
 def get_user(user_id: int, session: Conn):
 
     user = session.get(Node, user_id)
      
     if not user:
         raise HTTPException(status_code=404, detail='User not found')
+   
+    node = user.dict()
+    node['name'] = user.first_name 
+    
+    new_node = NodePublic(**node)
+    return new_node
 
-    return user
 
-@router.post('/node')
-def new_user(new_node: NodeCreate, session: Conn):
+@router.post('/node/{user_id}')
+def new_user(user_id: int, new_node: NodeCreate, session: Conn):
     """
     creates a new user node.
 
     Parameters:
+    user_id: id of the current user
     first_name: first name of the new user
     last_name: last name of the new user
     image: base64 encoded jpg image
@@ -52,14 +60,24 @@ def new_user(new_node: NodeCreate, session: Conn):
     image_file.close()
 
     embed = gen_embed(saved_file, get_facenet_model())[0]
-    print(embed)
 
     node_data = new_node.dict()
     node_data['embed'] = embed
     node_db = Node(**node_data)
 
+
     session.add(node_db)
     session.commit()
-    session.refresh
+    session.refresh(node_db)
+    
+    edge1 = Edge(source=user_id, target=node_db.id)
+    session.add(edge1)
+    session.commit()
+    session.refresh(edge1)
+   
+    edge2 = Edge(source=node_db.id, target=user_id)
+    session.add(edge2)
+    session.commit()
+    session.refresh(edge2)
     
     return node_db

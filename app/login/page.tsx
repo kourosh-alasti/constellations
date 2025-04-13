@@ -1,22 +1,15 @@
 "use client";
 
 import { LoginForm } from "@/components/ui/login-form";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import FaceID from "@/components/ui/face-id";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const handleClose = (open: boolean) => {
     setOpen(open);
-  };
-
-  const handleSuccess = () => {
-    // Navigate to the dashboard or home page after successful login
-    router.push("/");
   };
 
   const handleError = (errorMessage: string) => {
@@ -32,7 +25,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <LoginForm onSuccess={handleSuccess} onError={handleError} />
+        <LoginForm onError={handleError} />
 
         <div className="flex items-center justify-center gap-4 my-6">
           <div className="h-px flex-1 bg-muted" />
@@ -44,6 +37,7 @@ export default function LoginPage() {
           Use your Face
         </Button>
         <FaceID open={open} onOpenChange={handleClose} />
+
       </div>
     </div>
   );
