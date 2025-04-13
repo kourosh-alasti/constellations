@@ -59,7 +59,7 @@ export default function CameraDialog({ open, onOpenChange }: CameraDialogProps) 
     console.log("Submitting payload:", payload);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/node", {
+      const res = await fetch("api/py/node", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
