@@ -1,4 +1,4 @@
-import { StarCard } from "@/components/ui/star_card";
+import { StarCard } from "@/components/ui/send-face";
 
 export default function ProfileForm() {
   return (

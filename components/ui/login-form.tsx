@@ -15,6 +15,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
+import FaceID from "@/components/ui/face-id";
+import { ScanFace } from 'lucide-react';
 
 // Define form schema with Zod
 const formSchema = z.object({
@@ -31,6 +33,11 @@ interface LoginFormProps {
 export function LoginForm({ onError }: LoginFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleClose = (open: boolean) => {
+    setOpen(open);
+  };
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -128,9 +135,21 @@ export function LoginForm({ onError }: LoginFormProps) {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Log in"}
-          </Button>
+          <div className="flex w-full gap-4">
+            <Button type="submit" className="flex-1" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Log in"}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="w-9 h-9 p-0 flex items-center justify-center rounded-md border"
+            >
+              <ScanFace className="w-6 h-6" />
+            </Button>
+          </div>
+
+          <FaceID open={open} onOpenChange={handleClose} />
         </form>
       </Form>
     </div>
