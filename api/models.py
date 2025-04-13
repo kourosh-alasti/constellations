@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, Field
 class BaseNode(SQLModel):
     first_name: str
     last_name: str
-    image: bytes
+    image: str # This is a base64 encoded jpg image
     color: str = Field(default='#ffffff')
 
 class NodeCreate(BaseNode):
@@ -14,7 +14,6 @@ class NodeCreate(BaseNode):
 
 class Node(BaseNode, table=True):
     id: int | None = Field(default=None, primary_key=True)
-
 
 # Edge
 # TODO: Fill in relationship deps
