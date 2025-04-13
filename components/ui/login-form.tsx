@@ -70,8 +70,8 @@ export function LoginForm({ onError }: LoginFormProps) {
         throw new Error(result.message || "Authentication failed");
       }
 
-      if (result.id) {
-        localStorage.setItem("user_id", result.id);
+      if (result) {
+        localStorage.setItem("user_id", result);
         router.push("/nodes");
       } else {
         if (onError) {

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import WebcamCapture from "@/components/ui/camera";
+import { redirect } from "next/navigation";
 
 interface CameraDialogProps {
   open: boolean;
@@ -80,8 +81,13 @@ export default function CameraDialog({
 
     console.log("Submitting payload:", payload);
 
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      redirect("/login");
+    }
+
     try {
-      const res = await fetch("/api/py/node/1", {
+      const res = await fetch(`/api/py/node/${String(userId)}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,6 +100,7 @@ export default function CameraDialog({
 
       const data = await res.json();
       console.log("Upload successful!", data);
+      location.reload();
 
       // reset everything
       onOpenChange(false);

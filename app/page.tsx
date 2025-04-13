@@ -18,7 +18,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-space flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <header className="container mx-auto p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold font-space text-gradient">
           Constellations

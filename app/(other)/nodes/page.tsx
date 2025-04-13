@@ -6,6 +6,9 @@ import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import CameraDialog from "@/components/ui/camera-dialog";
 import EditProfileButton from "@/components/ui/edit-profile";
+import { redirect, useRouter } from "next/navigation";
+import { LogOutIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import the Graph component to avoid SSR issues
 const GraphComponent = dynamic(
@@ -37,67 +40,8 @@ interface GraphData {
   edges: Edge[];
 }
 
-const generateData = (numNodes = 20, theme = "dark"): GraphData => {
-  // Space-themed names
-  const names = [
-    "Andromeda",
-    "Sirius",
-    "Vega",
-    "Rigel",
-    "Altair",
-    "Antares",
-    "Polaris",
-    "Arcturus",
-    "Betelgeuse",
-    "Procyon",
-    "Castor",
-    "Aldebaran",
-    "Deneb",
-    "Regulus",
-    "Bellatrix",
-  ];
-
-  // Star colors based on theme
-  const starColors =
-    theme === "dark"
-      ? [
-          "var(--star-color-1)",
-          "var(--star-color-2)",
-          "var(--star-color-3)",
-          "var(--star-color-4)",
-          "var(--star-color-5)",
-        ]
-      : [
-          "var(--sun-color-1)",
-          "var(--sun-color-2)",
-          "var(--sun-color-3)",
-          "var(--sun-color-4)",
-          "var(--sun-color-5)",
-        ];
-
-  const nodes = Array.from(Array(numNodes).keys()).map((i) => ({
-    id: i,
-    name: names[i % names.length] + `_${i}`,
-    x: Math.random() * 1000,
-    y: Math.random() * 800,
-    vx: 0,
-    vy: 0,
-    color: starColors[i % starColors.length],
-    size: Math.random() * 3 + 3,
-  }));
-
-  const edges = Array.from(Array(numNodes).keys())
-    .filter((i) => i > 0)
-    .map((i) => ({
-      source: i,
-      target: Math.floor(Math.random() * i),
-      value: Math.random() * 2 + 1,
-    }));
-
-  return { nodes, edges };
-};
-
 const NodesPage = () => {
+  const router = useRouter();
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
     edges: [],
@@ -114,7 +58,20 @@ const NodesPage = () => {
 
   useEffect(() => {
     // Generate initial data with current theme
-    setGraphData(generateData(15, theme));
+    async function fetcher() {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        redirect("/login");
+      }
+
+      const response = await fetch(`/api/py/graph/${userId}`);
+      if (!response.ok) throw new Error("Failed to fetch user graph");
+      const data = await response.json();
+
+      setGraphData(data);
+    }
+
+    fetcher();
 
     // Set initial dimensions
     updateDimensions();
@@ -136,7 +93,7 @@ const NodesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-space text-foreground">
+    <div className="min-h-screen text-foreground">
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -148,6 +105,16 @@ const NodesPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-md transition-colors glow flex flex-row gap-1"
+              onClick={() => {
+                localStorage.removeItem("user_id");
+                router.replace("/login");
+              }}
+            >
+              <LogOutIcon />
+              Log Out
+            </Button>
             <EditProfileButton />
             <ThemeToggle />
           </div>
