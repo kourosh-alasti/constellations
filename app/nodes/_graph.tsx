@@ -58,17 +58,54 @@ export const Graph = ({ data, width, height }: GraphProps) => {
 
   // Theme settings inspired by Obsidian
   const theme = {
-    background: "#1a1a1a",
-    node: "#6272a4",
-    nodeHover: "#bd93f9",
-    nodeSelected: "#ff79c6",
-    link: "#4c566a",
-    linkHighlight: "#8be9fd",
-    text: "#f8f8f2",
-    tooltipBackground: "rgba(40, 42, 54, 0.9)",
-    grid: "#333333",
-    dots: "rgba(255, 255, 255, 0.07)",
+    background: "transparent",
+    node: "rgba(189, 147, 249, 1)", // Purple star color
+    nodeHover: "rgba(255, 121, 198, 1)", // Pink star color
+    nodeSelected: "rgba(139, 233, 253, 1)", // Cyan star color
+    link: "rgba(255, 255, 255, 0.15)",
+    linkHighlight: "rgba(139, 233, 253, 1)", // Cyan link highlight
+    text: "rgba(236, 239, 244, 1)",
+    tooltipBackground: "rgba(22, 27, 34, 1)",
+    grid: "transparent",
+    dots: "rgba(255, 255, 255, 0.05)",
   };
+
+  // Light mode theme settings
+  const lightTheme = {
+    background: "transparent",
+    node: "rgba(217, 119, 6, 1)", // Orange star color
+    nodeHover: "rgba(249, 115, 22, 1)", // Brighter orange star color
+    nodeSelected: "rgba(245, 158, 11, 1)", // Yellow star color
+    link: "rgba(234, 88, 12, 0.4)",
+    linkHighlight: "rgba(245, 158, 11, 1)", // Yellow link highlight
+    text: "rgba(45, 55, 72, 1)",
+    tooltipBackground: "rgba(255, 248, 234, 1)",
+    grid: "transparent",
+    dots: "rgba(245, 158, 11, 0.6)",
+  };
+
+  // Determine which theme to use based on dark mode
+  const [themeMode, setThemeMode] = useState(theme);
+
+  useEffect(() => {
+    // Check if system is in dark mode or light mode
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    setThemeMode(isDarkMode ? theme : lightTheme);
+
+    // Listen for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          const isDark = document.documentElement.classList.contains("dark");
+          setThemeMode(isDark ? theme : lightTheme);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Create dot matrix background pattern
   useEffect(() => {
@@ -82,13 +119,13 @@ export const Graph = ({ data, width, height }: GraphProps) => {
     if (!ctx) return;
 
     // Fill background
-    ctx.fillStyle = theme.background;
+    ctx.fillStyle = themeMode.background;
     ctx.fillRect(0, 0, width, height);
 
     // Draw dot matrix
     const dotSize = 1.5;
     const spacing = 20;
-    ctx.fillStyle = theme.dots;
+    ctx.fillStyle = themeMode.dots;
 
     for (let x = spacing; x < width; x += spacing) {
       for (let y = spacing; y < height; y += spacing) {
@@ -97,7 +134,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         ctx.fill();
       }
     }
-  }, [width, height, theme.background, theme.dots]);
+  }, [width, height, themeMode.background, themeMode.dots]);
 
   // Process data on mount
   useEffect(() => {
@@ -110,7 +147,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         const processedNode = {
           ...node,
           val: node.size || 5,
-          color: node.color || theme.node,
+          color: themeMode.node || node.color,
           neighbors: [],
         };
         nodeMap.set(node.id, processedNode);
@@ -154,7 +191,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         links: processedLinks.length,
       });
     }
-  }, [data, theme.node]);
+  }, [data, themeMode.node]);
 
   // Add function to fetch node data
   const fetchNodeData = useCallback(async (nodeId: number) => {
@@ -198,11 +235,11 @@ export const Graph = ({ data, width, height }: GraphProps) => {
     const isHighlighted = highlightNodes.some((n) => n.id === node.id);
     const isHovered = hoverNode && node.id === hoverNode.id;
 
-    // Apply appropriate color based on state
-    let nodeColor = node.color || theme.node;
-    if (isSelected) nodeColor = theme.nodeSelected;
-    else if (isHovered) nodeColor = theme.nodeHover;
-    else if (isHighlighted) nodeColor = theme.nodeHover;
+    // Add node.color
+    let nodeColor = themeMode.node;
+    if (isSelected) nodeColor = themeMode.nodeSelected;
+    else if (isHovered) nodeColor = themeMode.nodeHover;
+    else if (isHighlighted) nodeColor = themeMode.nodeHover;
 
     ctx.fillStyle = nodeColor;
 
@@ -228,11 +265,20 @@ export const Graph = ({ data, width, height }: GraphProps) => {
     ctx.closePath();
     ctx.fill();
 
+    // Add subtle glow effect for stars
+    if (isSelected || isHovered) {
+      ctx.save();
+      ctx.shadowColor = nodeColor;
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.restore();
+    }
+
     // Add node name label
     ctx.font = "10px system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.fillStyle = themeMode.text;
 
     // Draw text with slight offset above the node
     ctx.fillText(node.name, node.x!, node.y! - outerRadius - 5);
@@ -246,10 +292,10 @@ export const Graph = ({ data, width, height }: GraphProps) => {
           (l.source === link.source && l.target === link.target) ||
           (l.source === link.target && l.target === link.source)
       )
-        ? theme.linkHighlight
-        : theme.link;
+        ? themeMode.linkHighlight
+        : themeMode.link;
     },
-    [highlightLinks, theme]
+    [highlightLinks, themeMode]
   );
 
   // Handle node hover with prefetch
@@ -335,7 +381,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
         width: width,
         height: height,
         position: "relative",
-        background: theme.background,
+        background: themeMode.background,
         borderRadius: "8px",
         overflow: "hidden",
       }}
@@ -362,23 +408,23 @@ export const Graph = ({ data, width, height }: GraphProps) => {
           (node.val || 5) * (selectedNode?.id === node.id ? 1.5 : 1)
         }
         nodeCanvasObject={(node, ctx) =>
-          nodePaint(node, ctx, node.color || theme.node)
+          nodePaint(node, ctx, node.color || themeMode.node)
         }
         nodeCanvasObjectMode={() => "replace"}
         linkWidth={(link) => (highlightLinks.includes(link as Edge) ? 3 : 1.5)}
         linkColor={linkColor}
-        linkDirectionalParticles={4}
+        linkDirectionalParticles={5}
         linkDirectionalParticleWidth={(link) =>
           highlightLinks.includes(link as Edge) ? 6 : 0
         }
-        linkDirectionalParticleSpeed={0.005}
+        linkDirectionalParticleSpeed={0.003}
         backgroundColor="transparent"
         onNodeHover={handleNodeHover}
         onNodeClick={handleNodeClick}
         onBackgroundClick={handleBackgroundClick}
         cooldownTicks={200}
-        d3AlphaDecay={0.01}
-        d3VelocityDecay={0.2}
+        d3AlphaDecay={0.01} // Slower decay = more time to spread out
+        d3VelocityDecay={0.2} // Lower value = nodes move more freely
         minZoom={1}
         maxZoom={4}
       />
@@ -390,19 +436,21 @@ export const Graph = ({ data, width, height }: GraphProps) => {
             position: "absolute",
             top: 20,
             left: 20,
-            background: theme.tooltipBackground,
+            background: themeMode.tooltipBackground,
             padding: "12px 16px",
             borderRadius: 6,
-            color: theme.text,
+            color: themeMode.text,
             maxWidth: 200,
             boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
             zIndex: 10,
+            backdropFilter: "blur(8px)",
+            border: `1px solid ${themeMode.linkHighlight}40`,
           }}
         >
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: "bold" }}>
             {selectedNode.name}
           </h3>
-          <p style={{ margin: "8px 0 0", fontSize: 14 }}>
+          <p style={{ margin: "8px 0 0", fontSize: 14, opacity: 0.7 }}>
             {selectedNode.neighbors?.length || 0} connection
             {selectedNode.neighbors?.length !== 1 ? "s" : ""}
           </p>
@@ -415,7 +463,7 @@ export const Graph = ({ data, width, height }: GraphProps) => {
           position: "absolute",
           bottom: 20,
           right: 20,
-          color: "rgba(255,255,255,0.5)",
+          color: themeMode.text,
           fontSize: 12,
           textAlign: "right",
         }}
