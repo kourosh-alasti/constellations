@@ -6,6 +6,7 @@ import base64
 from pydantic import BaseModel, Field
 from sqlmodel import select
 from uuid import uuid4
+import numpy as np
 
 # from ..face import gen_embed
 from ..face import get_facenet_model, gen_embed
@@ -22,7 +23,7 @@ class FaceRequest(BaseModel):
 
 @router.post('/match-face/{user_id}')
 def match_face(face: FaceRequest, session: Conn):
-    SIMILARITY_THRESHOLD = 0.6  # Adjust this threshold as needed (0-1)
+    SIMILARITY_THRESHOLD = 0.45  # Threshold for L2 distance-based similarity
 
     try:
         # Process image
@@ -43,19 +44,22 @@ def match_face(face: FaceRequest, session: Conn):
         import os
         os.makedirs('uploads/temp', exist_ok=True)
 
+        # Open and convert image to RGB to ensure consistent format
         image_file = BytesIO(image_decoded)
-        image_file = Image.open(image_file)
-        image_file.save(saved_file)
+        image = Image.open(image_file).convert('RGB')
+        
+        # Save without enhancements - FaceNet works better with original images
+        image.save(saved_file, format='JPEG', quality=95)
         image_file.close()
 
-        # Generate embedding
-        embed = gen_embed(saved_file, get_facenet_model())[0]
-
-        # Use direct SQL with pgvector's distance function
+        # Generate embedding - gen_embed will handle face detection and alignment
+        embed = gen_embed(saved_file, get_facenet_model())
+        
+        # Use direct SQL with pgvector's L2 distance function
         from sqlalchemy import text, func
         from sqlalchemy.sql import select as sa_select
         
-        # Get only the closest match
+        # Get only the closest match using L2 distance
         stmt = select(
             Node.id, 
             Node.embed.l2_distance(embed).label("distance")
@@ -69,7 +73,7 @@ def match_face(face: FaceRequest, session: Conn):
         if not match:
             return {"match_id": -1}
             
-        # Convert distance to similarity score (0-1)
+        # Convert L2 distance to similarity score (0-1, higher is better)
         similarity_score = 1.0 / (1.0 + float(match.distance))
         
         # Return -1 if below threshold, otherwise return the match ID
@@ -121,7 +125,7 @@ def match_face_results(face: FaceRequest, session: Conn):
         image_file.close()
 
         # Generate embedding
-        embed = gen_embed(saved_file, get_facenet_model())[0]
+        embed = gen_embed(saved_file, get_facenet_model())
 
         # Use direct SQL with pgvector's distance function
         from sqlalchemy import text, func
@@ -209,17 +213,17 @@ def new_user(user_id: int, new_node: NodeCreate, session: Conn):
 
     saved_file = f'uploads/{new_node.first_name}_{new_node.last_name}.jpg'
 
+    # Open and ensure consistent format
     image_file = BytesIO(image_decoded)
-    image_file = Image.open(image_file)
-    image_file.save(saved_file)
+    image = Image.open(image_file).convert('RGB')
+    image.save(saved_file, format='JPEG', quality=95)
     image_file.close()
 
-    embed = gen_embed(saved_file, get_facenet_model())[0]
+    embed = gen_embed(saved_file, get_facenet_model())
 
     node_data = new_node.dict()
     node_data['embed'] = embed
     node_db = Node(**node_data)
-
 
     session.add(node_db)
     session.commit()

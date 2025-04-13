@@ -46,7 +46,7 @@ def new_user(new_node: NodeCreate, session: Conn):
     image_file.save(saved_file)
     image_file.close()
 
-    embed = gen_embed(saved_file, get_facenet_model())[0]
+    embed = gen_embed(saved_file, get_facenet_model())
 
     node_data = new_node.dict()
     node_data['embed'] = embed
