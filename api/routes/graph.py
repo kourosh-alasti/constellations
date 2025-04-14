@@ -52,3 +52,26 @@ def get_graph(user_id: int, session: Conn):
 
     return GraphResponse(nodes=public_nodes, edges=edges)
 
+
+@router.get('/graph', response_model=GraphResponse)
+def get_all_graph(session: Conn):
+    """
+    Get the entire graph with all nodes and edges
+    returns a complete list of all nodes and edges in the system
+    
+    This is useful for visualizing the entire network
+    """
+    # Get all nodes in the database
+    all_nodes = session.exec(select(Node)).all()
+    
+    # Get all edges in the database
+    all_edges = session.exec(select(Edge)).all()
+    
+    # Convert nodes to NodePublic
+    public_nodes = [NodePublic(
+        id=node.id,
+        name=f"{node.first_name} {node.last_name}",
+        color=node.color
+    ) for node in all_nodes]
+    
+    return GraphResponse(nodes=public_nodes, edges=all_edges)

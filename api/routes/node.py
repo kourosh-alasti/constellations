@@ -23,7 +23,7 @@ class FaceRequest(BaseModel):
 
 @router.post('/match-face/{user_id}')
 def match_face(face: FaceRequest, session: Conn):
-    SIMILARITY_THRESHOLD = 0.45  # Threshold for L2 distance-based similarity
+    SIMILARITY_THRESHOLD = 0.40  # Threshold for L2 distance-based similarity
 
     try:
         # Process image
